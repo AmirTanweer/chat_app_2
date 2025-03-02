@@ -3,6 +3,7 @@ const connectDB = require('./db');
 const cors=require('cors')
 const UserRoute=require('./routes/User.Route')
 const ChatRoute=require('./routes/Chat.Route')
+const MessageRoute=require('./routes/Message.Route')
 const app=express();
 const port=5000;
 app.use(express.json());
@@ -12,6 +13,7 @@ app.get('/',(req,res)=>{
 })
 app.use('/api/auth',UserRoute)
 app.use('/api/chat',ChatRoute)
+app.use('/api/message',MessageRoute)
 connectDB()
 app.listen(port,()=>{
     console.log("Server is running on Port ",port);
