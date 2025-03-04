@@ -20,13 +20,13 @@ const AuthState=({children})=>{
           };
       
           try {
-            const response = await axios.post(`${url}api/auth/signup`, requestBody, {
+            const response = await axios.post(`${url}api/auth/register`, requestBody, {
               headers: {
                 'Content-Type': 'application/json' // Set content type
               }
             });
              
-            return response.status;
+            return response.data.message
           } catch (error) {
             console.error('Error:', error.response?.data || error.message);
           }
@@ -83,18 +83,9 @@ const AuthState=({children})=>{
         console.error('Error:', error.response?.data || error.message);
       }
     }
-    useEffect(() => {
-      console.log('token -> ',token)
-     if(token){
-      setLoggedIn(true)
-      getUserDetails();
-      
-      
-     }
-    }, [token])
-    useEffect(()=>{
-      console.log("userdata -> ",userData)
-    },[userData]);
+    
+    
+    
     return (
     <AuthContext.Provider value={{SignUp,Logging,LogOut,loggedIn,getUserDetails,userData,token}}>
         {children}

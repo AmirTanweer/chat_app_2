@@ -1,7 +1,45 @@
 import React from "react";
 import { Link } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
+import AuthContext from "../context/Auth/AuthContext";
+import { useContext,useState } from "react";
+import Spinner from "../components/Spinner";
 const Login = () => {
+    const navigate=useNavigate();
+    const {Logging}=useContext(AuthContext)
+    const [loading,setLoading]=useState(false)
+
+    const [userData,setUserData]=useState({email:'',password:''})
+    const [alert, setAlert] = useState({ message: "", type: "" }); // Alert state
+    const handleChange=(e)=>{
+        
+        setUserData((prevUserData)=>({
+            ...prevUserData,
+            [e.target.name]:e.target.value
+        }))
+
+    }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true); // Show spinner
+        setAlert({ message: "", type: "" }); // Reset alert
+    
+        try {
+          let res = await Logging(userData);
+          console.log("Response -> ", res);
+    
+          if (res) {
+            setAlert({ message: "Login successful! Redirecting to HomePage...", type: "success" });
+            setTimeout(() => navigate("/"), 2000); // Redirect after 2 seconds
+          } else {
+            setAlert({ message: "Login failed. Please try again.", type: "danger" });
+          }
+        } catch (error) {
+          setAlert({ message: "An error occurred. Please try again.", type: "danger" });
+        }
+    
+        setLoading(false); // Hide spinner
+      };
   return (
     <section className="vh-100" style={{ backgroundColor: "#eee" }}>
       <div className="container h-100">
@@ -15,7 +53,14 @@ const Login = () => {
                       Login
                     </p>
 
-                    <form className="mx-1 mx-md-4">
+                     {/* Alert Message */}
+                     {alert.message && (
+                      <div className={`alert alert-${alert.type} text-center`} role="alert">
+                        {alert.message}
+                      </div>
+                    )}
+
+                    <form className="mx-1 mx-md-4" onSubmit={handleSubmit}>
                       <div className="d-flex flex-row align-items-center mb-4">
                         <i className="fas fa-envelope fa-lg me-3 fa-fw"></i>
                         <div className="form-outline flex-fill mb-0">
@@ -23,6 +68,9 @@ const Login = () => {
                             type="email"
                             className="form-control"
                             placeholder="Your Email"
+                            onChange={handleChange}
+                            value={userData.email}
+                            name="email"
                           />
                         </div>
                       </div>
@@ -34,6 +82,9 @@ const Login = () => {
                             type="password"
                             className="form-control"
                             placeholder="Password"
+                            onChange={handleChange}
+                            value={userData.password}
+                            name="password"
                           />
                         </div>
                       </div>
@@ -46,7 +97,7 @@ const Login = () => {
 
                       <div className="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
                         <button type="submit" className="btn btn-primary btn-lg">
-                          Login
+                         {loading ? <Spinner/> : "Login"} 
                         </button>
                       </div>
                     </form>

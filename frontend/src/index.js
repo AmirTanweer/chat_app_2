@@ -4,14 +4,14 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import SocketState from './context/Socket/SocketState';
+import AuthState from './context/Auth/AuthState';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
+  <AuthState>
   <SocketState>
-
-  
     <App />
-  
-  </SocketState>
+   </SocketState>
+  </AuthState>
 );
 
 // If you want to start measuring performance in your app, pass a function
