@@ -3,9 +3,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch, faPaperclip, faSmile, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import SideBar from "../components/SideBar";
 import Chat from "../components/Chat";
-
+import AuthContext from "../context/Auth/AuthContext";
+import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 const Home = () => {
- 
+  const {loggedIn}=useContext(AuthContext)
+  const navigate=useNavigate()
+ useEffect(()=>{
+     if(!loggedIn){
+      navigate('/login')
+     }
+ },[])
 
    
   

@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import SignUp from './pages/SignUp'
 import {BrowserRouter as Router ,Routes,Route} from 'react-router-dom'
 import NavBar from './components/NavBar'
+import UserDetails from './pages/UserDetails'
 const App = () => {
  
  
@@ -17,6 +18,7 @@ const App = () => {
      <Route path='/' element={<Home/>}/>
      <Route path='/login' element={<Login/>}/>
      <Route path='/signup' element={<SignUp/>}/>
+     <Route path='/user' element={<UserDetails/>}/>
      
       
       

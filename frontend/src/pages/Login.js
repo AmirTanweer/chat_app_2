@@ -1,45 +1,70 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useState, useEffect } from "react";
+import { Await, Link, useNavigate } from "react-router-dom";
 import AuthContext from "../context/Auth/AuthContext";
-import { useContext,useState } from "react";
+import ChatContext from "../context/Chat/ChatContext";
 import Spinner from "../components/Spinner";
+import SocketContext from "../context/Socket/SocketContext";
+
 const Login = () => {
-    const navigate=useNavigate();
-    const {Logging}=useContext(AuthContext)
-    const [loading,setLoading]=useState(false)
+  const { sendUserName ,sendLoggedInUserData} = useContext(SocketContext);
+  const navigate = useNavigate();
+  const { getAllChats } = useContext(ChatContext);
+  const { Logging, getUserDetails, userData } = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
+  const [luserData, setLUserData] = useState({ email: "", password: "" });
+  const [alert, setAlert] = useState({ message: "", type: "" });
 
-    const [userData,setUserData]=useState({email:'',password:''})
-    const [alert, setAlert] = useState({ message: "", type: "" }); // Alert state
-    const handleChange=(e)=>{
-        
-        setUserData((prevUserData)=>({
-            ...prevUserData,
-            [e.target.name]:e.target.value
-        }))
-
+  // Auto redirect if user is already logged in
+  useEffect(() => {
+    if (userData?._id) {
+      navigate("/");
     }
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true); // Show spinner
-        setAlert({ message: "", type: "" }); // Reset alert
-    
-        try {
-          let res = await Logging(userData);
-          console.log("Response -> ", res);
-    
-          if (res) {
-            setAlert({ message: "Login successful! Redirecting to HomePage...", type: "success" });
-            setTimeout(() => navigate("/"), 2000); // Redirect after 2 seconds
-          } else {
-            setAlert({ message: "Login failed. Please try again.", type: "danger" });
-          }
-        } catch (error) {
-          setAlert({ message: "An error occurred. Please try again.", type: "danger" });
-        }
-    
-        setLoading(false); // Hide spinner
-      };
+  }, [userData, navigate]);
+
+  const handleChange = (e) => {
+    setLUserData((prevUserData) => ({
+      ...prevUserData,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setAlert({ message: "", type: "" });
+
+    try {
+      const res = await Logging(luserData);
+      console.log('res -> ',res)
+      if (res?.success) {
+        console.log("inside if")
+        setAlert({ message: "Login successful! Redirecting...", type: "success" });
+        
+        // Fetch user details and chats
+       let userDetails= await getUserDetails();
+       console.log('userDetails -> ',userDetails.user)
+        await getAllChats();
+
+        // Send user name to socket (optional)
+        // sendUserName(userDetails.user.name);
+        //Send loggedIn user details to socket
+      await sendLoggedInUserData(userDetails.user)
+
+
+        console.log('before navigating')
+        // Redirect after a short delay
+        setTimeout(() => navigate("/"), 1000);
+      } else {
+        setAlert({ message: res?.message || "Login failed. Please try again.", type: "danger" });
+      }
+    } catch (error) {
+      setAlert({ message: "An error occurred. Please try again.", type: "danger" });
+      console.log(error)
+    }
+
+    setLoading(false);
+  };
+
   return (
     <section className="vh-100" style={{ backgroundColor: "#eee" }}>
       <div className="container h-100">
@@ -49,12 +74,9 @@ const Login = () => {
               <div className="card-body p-md-5">
                 <div className="row justify-content-center">
                   <div className="col-md-10 col-lg-6 col-xl-5 order-2 order-lg-1">
-                    <p className="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">
-                      Login
-                    </p>
+                    <p className="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Login</p>
 
-                     {/* Alert Message */}
-                     {alert.message && (
+                    {alert.message && (
                       <div className={`alert alert-${alert.type} text-center`} role="alert">
                         {alert.message}
                       </div>
@@ -69,8 +91,9 @@ const Login = () => {
                             className="form-control"
                             placeholder="Your Email"
                             onChange={handleChange}
-                            value={userData.email}
+                            value={luserData.email}
                             name="email"
+                            required
                           />
                         </div>
                       </div>
@@ -83,8 +106,9 @@ const Login = () => {
                             className="form-control"
                             placeholder="Password"
                             onChange={handleChange}
-                            value={userData.password}
+                            value={luserData.password}
                             name="password"
+                            required
                           />
                         </div>
                       </div>
@@ -96,8 +120,8 @@ const Login = () => {
                       </div>
 
                       <div className="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
-                        <button type="submit" className="btn btn-primary btn-lg">
-                         {loading ? <Spinner/> : "Login"} 
+                        <button type="submit" className="btn btn-primary btn-lg" disabled={loading}>
+                          {loading ? <Spinner /> : "Login"}
                         </button>
                       </div>
                     </form>

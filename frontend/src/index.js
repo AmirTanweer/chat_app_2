@@ -5,11 +5,19 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import SocketState from './context/Socket/SocketState';
 import AuthState from './context/Auth/AuthState';
+import ChatState from './context/Chat/ChatState';
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
 root.render(
   <AuthState>
+
   <SocketState>
+    <ChatState>
+
     <App />
+   
+    
+    </ChatState>
    </SocketState>
   </AuthState>
 );

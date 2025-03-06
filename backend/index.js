@@ -39,6 +39,9 @@ io.on("connection",(socket)=>{
     socket.on('username',(name)=>{
       console.log("username -> ",name)
     })
+    socket.on('loggedInUserData',(userData)=>{
+      console.log('loggedInUserData',userData)
+    })
     //Handle sending Message
       socket.on('message',(msg)=>{
         console.log("message -> ",msg)

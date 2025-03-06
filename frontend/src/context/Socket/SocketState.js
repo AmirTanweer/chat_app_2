@@ -1,53 +1,77 @@
-import SocketContext from "./SocketContext";
+import { createContext, useState, useEffect, useContext } from "react";
 import { io } from "socket.io-client";
-import { useState, useEffect } from "react";
+import AuthContext from "../Auth/AuthContext";
+import SocketContext from "./SocketContext";
 
-const SOCKET_URL = "http://localhost:5000/";
+const SOCKET_URL = "http://localhost:5000";
 
 const SocketState = ({ children }) => {
+  const { loggedIn,userData } = useContext(AuthContext); // Get user data from AuthContext
   const [socket, setSocket] = useState(null);
-  const [message,setMessage]=useState('')
-  const [messages,setMessages]=useState([])
-  const [userName,setUserName]=useState('');
-  const [userData,setUserData]=useState({name:"",message:""})
+  
+  const [messages, setMessages] = useState([]);
+  const [userName, setUserName] = useState("");
+  const [loggedInUserData,setLoggedInUserData]=useState({});
 
   useEffect(() => {
-    if(userName){
+    if (!loggedIn || !userData) return; // Only run if user is logged in
+    console.log("🔄 Setting logged-in user data from AuthContext...");
+
+    sendLoggedInUserData(userData)
+  }, [loggedIn, userData]); // Run when `loggedIn` or `userData` changes
+
+  useEffect(() => {
+    console.log('loggeIn check -> ',loggedIn)
+    if(!loggedIn) return ;
 
       // Initialize socket connection only once
-      const newSocket = io(SOCKET_URL);
+      const newSocket = io(SOCKET_URL, { autoConnect: false });
+    setSocket(newSocket);
 
-      newSocket.on("connect", () => {
+    newSocket.on("connect", () => {
       console.log("Connected to server, socket ID:", newSocket.id);
-      // newSocket.emit("joinRoom", { room: "General" });
     });
-    newSocket.emit("username", userName);
-
-
 
     newSocket.on("message", (data) => {
-      setMessages((prevMessages)=>[...prevMessages,data])
-      console.log("New message: ", data);
+      setMessages((prevMessages) => [...prevMessages, data]);
+      console.log("New message received: ", data);
     });
     
-    setSocket(newSocket);
-    
-    // Cleanup function to disconnect on unmount
+    // Cleanup function to disconnect socket on unmount
     return () => {
       newSocket.disconnect();
       console.log("Socket disconnected");
-    };
-  }
-  }, [userName]);
+    }
+    
+  }, [loggedIn]);
 
-const sendUserName=(name)=>{
-  setUserName(name)
-  
-}
+  // Emit username once socket is connected
+  useEffect(() => {
+    console.log('socket ->',socket , ' & ', ' loggedInUserData -> ',loggedInUserData)
+    if (socket && loggedInUserData) {
+      socket.connect();
+      socket.emit("loggedInUserData", loggedInUserData);
+    }
+  }, [socket, loggedInUserData]);
 
-  const sendMessage =async (msg) => {
+  const sendUserName = (name) => {
+    setUserName(name);
     if (socket) {
-     let messageData={name:userName,message:msg}
+      socket.emit("username", name);
+    }
+  };
+  
+  const sendLoggedInUserData=(userData)=>{
+    console.log('userdetails in socket State -> ',userData)
+     setLoggedInUserData(userData);
+     if(socket){
+      socket.emit('loggedInUserData',loggedInUserData)
+     }
+  }
+
+  const sendMessage = (msg) => {
+    if (socket) {
+      const messageData = { name: userName, message: msg };
       socket.emit("message", messageData);
     } else {
       console.log("Socket not connected yet");
@@ -55,7 +79,7 @@ const sendUserName=(name)=>{
   };
 
   return (
-    <SocketContext.Provider value={{ sendMessage,message,setMessage,messages ,sendMessage,userName,setUserName,sendUserName}}>
+    <SocketContext.Provider value={{ sendMessage, messages, userName, sendUserName,sendLoggedInUserData }}>
       {children}
     </SocketContext.Provider>
   );

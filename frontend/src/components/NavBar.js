@@ -1,13 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import AuthContext from "../context/Auth/AuthContext";
+import { useContext } from "react";
 const NavBar = () => {
+  const {loggedIn,LogOut,getUserDetails,userData}=useContext(AuthContext);
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
       <div className="container">
         <Link className="navbar-brand" to="/">
-          Chat App
+          Chat App  {userData?` : ${userData.name}`:""}
         </Link>
         <button
           className="navbar-toggler"
@@ -27,7 +29,23 @@ const NavBar = () => {
                 Home
               </Link>
             </li>
+            {
+              loggedIn ? 
+              <>
+              <li className="nav-item">
+              <Link className="nav-link" to="/user">
+                User
+              </Link>
+            </li>
             <li className="nav-item">
+              <Link className="nav-link" onClick={LogOut} to="/login">
+                LogOut
+              </Link>
+            </li>
+              </>
+              :
+              <>
+                  <li className="nav-item">
               <Link className="nav-link" to="/login">
                 Login
               </Link>
@@ -37,6 +55,9 @@ const NavBar = () => {
                 Signup
               </Link>
             </li>
+              </>
+            }
+            
           </ul>
         </div>
       </div>
