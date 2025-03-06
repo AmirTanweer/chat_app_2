@@ -4,6 +4,7 @@ import { useContext } from 'react'
 const UserDetails = () => {
     const {userData}=useContext(AuthContext)
     console.log("userData in details ->",userData)
+    
   return (
    userData &&  <div style={{
       display:'flex',justifyContent:'center',flexDirection:'column' ,alignItems:'center'

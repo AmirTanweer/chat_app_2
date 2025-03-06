@@ -25,10 +25,10 @@ const SideBar = () => {
         </div>
 
         {/* Groups Section */}
-       <Groups/>
+       {/* <Groups/> */}
 
         {/* Friends/Private Chats Section */}
-        <Freinds/>
+        {/* <Freinds/> */}
 
         {/* Online Users Section */}
         <OnlineUsers/>

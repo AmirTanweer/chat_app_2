@@ -9,6 +9,7 @@ const AuthState = ({ children }) => {
   const [token, setToken] = useState(sessionStorage.getItem("token") || "");
   const [loggedIn, setLoggedIn] = useState(!!token);
   const [loading, setLoading] = useState(false);
+  const [loggedInUserId,setLoggedInUserId]=useState('');
 
   useEffect(() => {
     const storedToken = sessionStorage.getItem("token");
@@ -81,7 +82,7 @@ const AuthState = ({ children }) => {
           Authorization: `Bearer ${storedToken}`,
         },
       });
-  
+      setLoggedInUserId(response.data.user._id)
       console.log("✅ User details received:", response.data.user);
       setUserData(response.data.user);
       return response.data;
@@ -93,7 +94,7 @@ const AuthState = ({ children }) => {
   
 
   return (
-    <AuthContext.Provider value={{ SignUp, Logging, LogOut, loggedIn, userData, token,getUserDetails }}>
+    <AuthContext.Provider value={{ SignUp, Logging, LogOut, loggedIn, userData, token,getUserDetails,loggedInUserId }}>
       {children}
     </AuthContext.Provider>
   );

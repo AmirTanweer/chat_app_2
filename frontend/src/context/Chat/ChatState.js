@@ -3,13 +3,14 @@ import AuthContext from "../Auth/AuthContext";
 import { useContext,useEffect,useState } from "react";
 import axios from "axios";
 const ChatState=({children})=>{
+
     const {token}=useContext(AuthContext)
     const [chats,setChats]=useState([]);
      const url='http://localhost:5000/'
 
      useEffect(() => {
         if (token) {
-            // getAllChats(); // Fetch chats only when token is available
+            getAllChats(); // Fetch chats only when token is available
         }
     }, [token]); // Dependency on token, runs when token changes
 
@@ -26,7 +27,7 @@ const getAllChats=async()=>{
             'authorization':`Bearer ${token}`
           }
         });
-       console.log('all Chats -> ',response.data)
+       // console.log('all Chats -> ',response.data)
        setChats(response.data)
          
         

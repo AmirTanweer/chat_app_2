@@ -1,46 +1,78 @@
-
-import React, { useContext } from "react";
-import ChatContext from "../context/Chat/ChatContext";
+import React, { useContext, useState } from "react";
+import { motion } from "framer-motion"; // Animation library
+import SocketContext from "../context/Socket/SocketContext";
+import AuthContext from "../context/Auth/AuthContext";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserGroup } from "@fortawesome/free-solid-svg-icons"; // Import specific icon
+import ModalComponent from "../components/ModalComponent";
+
 const OnlineUsers = () => {
-    const { chats } = useContext(ChatContext);
-    console.log("chats-> ", chats);
+  const { onlineUsers } = useContext(SocketContext);
+  const { loggedInUserId } = useContext(AuthContext);
   
-    // Mock data (replace with real data from context)
-    const loggedInUserId = "67c2e75d148f1357f28d38bf";
-    const defaultProfilePic = "https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg";
+  const [show, setShow] = useState(false);
+  const [modalUserName, setModalUserName] = useState("");
+
+  // Function to open modal and set the user's name
+  const showModal = (name) => {
+    setModalUserName(name);
+    setShow(true);
+  };
+
   return (
     <div className="mb-4">
-          <h5 className="text-success">Online Users</h5>
-          <ul className="list-group">
-            {chats
-              .flatMap(chat => chat.users)
-              .filter(user => user._id !== loggedInUserId) // Exclude logged-in user
-              .map(user => (
-                <li key={user._id} className="list-group-item d-flex align-items-center">
-                  <img
-                    src={user.profilePic || defaultProfilePic}
-                    alt="User"
-                    className="rounded-circle me-2"
-                    width="40"
-                    height="40"
-                  />
-                  <div className="d-flex align-items-center">
-                  <span
-  className="bg-success d-inline-block me-2"
-  style={{
-    width: "10px",
-    height: "10px",
-    borderRadius: "50%",
-  }}
-></span>
-                    {user.name}
-                  </div>
-                </li>
-              ))}
-          </ul>
-        </div>
-  )
-}
+      {/* Render Modal */}
+      <ModalComponent show={show} setShow={setShow} modalUserName={modalUserName} />
+      
+      <h5 className="text-success mb-3">👥 Online Users</h5>
+      <ul className="list-group">
+        {onlineUsers?.length > 0 ? (
+          onlineUsers
+            .filter((user) => user._id !== loggedInUserId) // Exclude logged-in user
+            .map((user) => (
+              <motion.li
+                key={user._id}
+                className="list-group-item d-flex align-items-center"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Green dot indicator */}
+                <span className="dot bg-success me-2"></span>
+                <strong>{user.name}</strong>
 
-export default OnlineUsers
+                {/* Clickable Icon to Open Modal */}
+                <FontAwesomeIcon
+                  onClick={() => showModal(user.name)}
+                  style={{ color: "green", marginLeft: "auto", cursor: "pointer" }}
+                  icon={faUserGroup}
+                />
+              </motion.li>
+            ))
+        ) : (
+          <motion.li
+            className="list-group-item text-muted text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            No users online
+          </motion.li>
+        )}
+      </ul>
+
+      {/* CSS Styles */}
+      <style>{`
+        .dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          display: inline-block;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default OnlineUsers;

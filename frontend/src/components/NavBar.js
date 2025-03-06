@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import AuthContext from "../context/Auth/AuthContext";
 import { useContext } from "react";
 const NavBar = () => {
-  const {loggedIn,LogOut,getUserDetails,userData}=useContext(AuthContext);
+  const {loggedIn,LogOut,userData}=useContext(AuthContext);
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
       <div className="container">

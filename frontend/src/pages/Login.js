@@ -35,23 +35,25 @@ const Login = () => {
 
     try {
       const res = await Logging(luserData);
-      console.log('res -> ',res)
+      // console.log('res -> ',res)
       if (res?.success) {
-        console.log("inside if")
+        // console.log("inside if")
         setAlert({ message: "Login successful! Redirecting...", type: "success" });
         
         // Fetch user details and chats
        let userDetails= await getUserDetails();
-       console.log('userDetails -> ',userDetails.user)
+       // console.log('userDetails -> ',userDetails.user)
+
+       //Send loggedIn user details to socket
+       await sendLoggedInUserData(userDetails.user)
+
         await getAllChats();
 
-        // Send user name to socket (optional)
-        // sendUserName(userDetails.user.name);
-        //Send loggedIn user details to socket
-      await sendLoggedInUserData(userDetails.user)
+        
+        
 
 
-        console.log('before navigating')
+        // console.log('before navigating')
         // Redirect after a short delay
         setTimeout(() => navigate("/"), 1000);
       } else {
@@ -59,7 +61,7 @@ const Login = () => {
       }
     } catch (error) {
       setAlert({ message: "An error occurred. Please try again.", type: "danger" });
-      console.log(error)
+      // console.log(error)
     }
 
     setLoading(false);

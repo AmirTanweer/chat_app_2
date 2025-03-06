@@ -6,6 +6,7 @@ import Chat from "../components/Chat";
 import AuthContext from "../context/Auth/AuthContext";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+
 const Home = () => {
   const {loggedIn}=useContext(AuthContext)
   const navigate=useNavigate()
@@ -30,6 +31,7 @@ const Home = () => {
                   {/* Left Sidebar (Chat List) */}
                   <SideBar FontAwesomeIcon={FontAwesomeIcon} faSearch={faSearch}/>
                   {/* Chat Window */}
+                 
                   <Chat/>
                   
                 </div> {/* End Row */}

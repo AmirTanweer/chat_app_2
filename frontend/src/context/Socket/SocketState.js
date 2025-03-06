@@ -6,51 +6,53 @@ import SocketContext from "./SocketContext";
 const SOCKET_URL = "http://localhost:5000";
 
 const SocketState = ({ children }) => {
-  const { loggedIn,userData } = useContext(AuthContext); // Get user data from AuthContext
+  const { loggedIn, userData } = useContext(AuthContext);
   const [socket, setSocket] = useState(null);
-  
   const [messages, setMessages] = useState([]);
   const [userName, setUserName] = useState("");
-  const [loggedInUserData,setLoggedInUserData]=useState({});
+  const [loggedInUserData, setLoggedInUserData] = useState({});
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
+  // Initialize socket connection when user logs in
   useEffect(() => {
-    if (!loggedIn || !userData) return; // Only run if user is logged in
-    console.log("🔄 Setting logged-in user data from AuthContext...");
+    if (!loggedIn) return;
 
-    sendLoggedInUserData(userData)
-  }, [loggedIn, userData]); // Run when `loggedIn` or `userData` changes
-
-  useEffect(() => {
-    console.log('loggeIn check -> ',loggedIn)
-    if(!loggedIn) return ;
-
-      // Initialize socket connection only once
-      const newSocket = io(SOCKET_URL, { autoConnect: false });
+    const newSocket = io(SOCKET_URL, { autoConnect: false });
     setSocket(newSocket);
 
     newSocket.on("connect", () => {
-      console.log("Connected to server, socket ID:", newSocket.id);
+      console.log("✅ Connected to server, socket ID:", newSocket.id);
+    });
+
+    // Listen for online users update
+    newSocket.on("onlineUsers", (users) => {
+      console.log("👥 Online Users:", users);
+      setOnlineUsers(users);
     });
 
     newSocket.on("message", (data) => {
       setMessages((prevMessages) => [...prevMessages, data]);
-      console.log("New message received: ", data);
     });
-    
-    // Cleanup function to disconnect socket on unmount
+
     return () => {
       newSocket.disconnect();
-      console.log("Socket disconnected");
-    }
-    
+      console.log("❌ Socket disconnected");
+    };
   }, [loggedIn]);
 
-  // Emit username once socket is connected
+  // Send logged-in user data when `userData` is available
   useEffect(() => {
-    console.log('socket ->',socket , ' & ', ' loggedInUserData -> ',loggedInUserData)
-    if (socket && loggedInUserData) {
+    if (userData && Object.keys(userData).length > 0) {
+      setLoggedInUserData(userData);
+    }
+  }, [userData]);
+
+  // Emit `loggedInUserData` when `socket` is ready and data exists
+  useEffect(() => {
+    if (socket && Object.keys(loggedInUserData).length > 0) {
       socket.connect();
       socket.emit("loggedInUserData", loggedInUserData);
+      console.log("📡 Sent loggedInUserData:", loggedInUserData);
     }
   }, [socket, loggedInUserData]);
 
@@ -60,26 +62,24 @@ const SocketState = ({ children }) => {
       socket.emit("username", name);
     }
   };
-  
-  const sendLoggedInUserData=(userData)=>{
-    console.log('userdetails in socket State -> ',userData)
-     setLoggedInUserData(userData);
-     if(socket){
-      socket.emit('loggedInUserData',loggedInUserData)
-     }
-  }
+
+  const sendLoggedInUserData = (userData) => {
+    setLoggedInUserData(userData);
+  };
 
   const sendMessage = (msg) => {
     if (socket) {
       const messageData = { name: userName, message: msg };
       socket.emit("message", messageData);
     } else {
-      console.log("Socket not connected yet");
+      console.log("⚠️ Socket not connected yet");
     }
   };
 
   return (
-    <SocketContext.Provider value={{ sendMessage, messages, userName, sendUserName,sendLoggedInUserData }}>
+    <SocketContext.Provider
+      value={{ sendMessage, messages, onlineUsers, userName, sendUserName, sendLoggedInUserData }}
+    >
       {children}
     </SocketContext.Provider>
   );
