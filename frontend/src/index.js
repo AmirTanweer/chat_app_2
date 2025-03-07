@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import SocketState from './context/Socket/SocketState';
 import AuthState from './context/Auth/AuthState';
 import ChatState from './context/Chat/ChatState';
+import MessageState from './context/Message/MessageState';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
@@ -13,9 +14,11 @@ root.render(
 
   <SocketState>
     <ChatState>
+   <MessageState>
 
     <App />
    
+   </MessageState>
     
     </ChatState>
    </SocketState>

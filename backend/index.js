@@ -33,11 +33,11 @@ const io = new Server(server, {
 // Socket.io connection event
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
-
+  
   // When a user logs in, store their data
   socket.on("loggedInUserData", (userData) => {
     console.log("🔵 New user logged in:", userData);
-
+  
     // Store user in `onlineUsers` object using socket ID
     onlineUsers[socket.id] = userData;
 
@@ -48,9 +48,9 @@ io.on("connection", (socket) => {
   // Handle sending messages
   socket.on("message", (msg) => {
     console.log("📩 New message:", msg);
-    socket.broadcast.emit("message", msg);
+    io.emit("message", msg);
   });
-
+ 
   // Handle user disconnection
   socket.on("disconnect", () => {
     console.log(`❌ User Disconnected: ${socket.id}`);

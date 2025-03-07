@@ -28,7 +28,7 @@ const SideBar = () => {
        {/* <Groups/> */}
 
         {/* Friends/Private Chats Section */}
-        {/* <Freinds/> */}
+        <Freinds/>
 
         {/* Online Users Section */}
         <OnlineUsers/>

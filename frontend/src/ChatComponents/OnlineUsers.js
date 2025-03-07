@@ -6,30 +6,47 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserGroup } from "@fortawesome/free-solid-svg-icons"; // Import specific icon
 import ModalComponent from "../components/ModalComponent";
+import ChatContext from "../context/Chat/ChatContext";
 
 const OnlineUsers = () => {
   const { onlineUsers } = useContext(SocketContext);
   const { loggedInUserId } = useContext(AuthContext);
-  
+  const { chats } = useContext(ChatContext);
   const [show, setShow] = useState(false);
   const [modalUserName, setModalUserName] = useState("");
+  const [modalUserId, setModalUserId] = useState("");
 
   // Function to open modal and set the user's name
-  const showModal = (name) => {
+  const showModal = (name, userId) => {
+    setModalUserId(userId);
     setModalUserName(name);
     setShow(true);
   };
 
+  // Get IDs of existing friends (one-on-one chats)
+  const friendIds = chats
+    .filter((chat) => !chat.isGroupChat)
+    .flatMap((chat) => chat.users)
+    .map((user) => user._id);
+
   return (
     <div className="mb-4">
       {/* Render Modal */}
-      <ModalComponent show={show} setShow={setShow} modalUserName={modalUserName} />
-      
+      <ModalComponent
+        show={show}
+        setShow={setShow}
+        modalUserName={modalUserName}
+        modalUserId={modalUserId}
+      />
+
       <h5 className="text-success mb-3">👥 Online Users</h5>
       <ul className="list-group">
         {onlineUsers?.length > 0 ? (
           onlineUsers
-            .filter((user) => user._id !== loggedInUserId) // Exclude logged-in user
+            .filter(
+              (user) =>
+                user._id !== loggedInUserId && !friendIds.includes(user._id) // Exclude logged-in user & friends
+            )
             .map((user) => (
               <motion.li
                 key={user._id}
@@ -44,8 +61,12 @@ const OnlineUsers = () => {
 
                 {/* Clickable Icon to Open Modal */}
                 <FontAwesomeIcon
-                  onClick={() => showModal(user.name)}
-                  style={{ color: "green", marginLeft: "auto", cursor: "pointer" }}
+                  onClick={() => showModal(user.name, user._id)}
+                  style={{
+                    color: "green",
+                    marginLeft: "auto",
+                    cursor: "pointer",
+                  }}
                   icon={faUserGroup}
                 />
               </motion.li>
